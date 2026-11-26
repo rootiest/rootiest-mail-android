@@ -8,8 +8,19 @@ import { NativeModules, Platform } from 'react-native';
  * android/app/build.gradle, read from the BulwarkBuild native module. A build
  * without the module (older native code) is the sideloaded GitHub APK.
  */
-export const androidDistribution: 'github' | 'play' =
-  Platform.OS === 'android' && NativeModules.BulwarkBuild?.distribution === 'play' ? 'play' : 'github';
+export const androidDistribution: 'github' | 'play' | 'rootiest' =
+  Platform.OS !== 'android' ? 'github'
+  : NativeModules.BulwarkBuild?.distribution === 'play' ? 'play'
+  : NativeModules.BulwarkBuild?.distribution === 'rootiest' ? 'rootiest'
+  : 'github';
+
+/**
+ * Google push (FCM) on Android: false in a build without a Firebase project
+ * for its package (BuildConfig.FCM_AVAILABLE), which pushes over UnifiedPush
+ * only. Older native code without the constant had FCM.
+ */
+export const supportsFcm =
+  Platform.OS === 'android' && NativeModules.BulwarkBuild?.fcmAvailable !== false;
 
 /**
  * In-app sideload updates: download the release APK from GitHub and hand it to

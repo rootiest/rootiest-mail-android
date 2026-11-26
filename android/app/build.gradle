@@ -340,3 +340,6 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// Rootiest Mail: the rootiest flavor and everything else Rootiest-specific in the build.
+apply from: "rootiest.gradle"

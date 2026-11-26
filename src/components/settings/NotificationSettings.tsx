@@ -54,6 +54,7 @@ import { canBadgeAppIcon } from '../../lib/app-badge';
 import { isAccountMuted, setAccountMuted } from '../../lib/notification-mutes';
 import { jmapClient } from '../../api/jmap-client';
 import { APP_NAME } from './AboutSettings';
+import { supportsFcm } from '../../lib/platform-capabilities';
 
 type PushStatus =
   | { kind: 'idle' }
@@ -115,7 +116,7 @@ export function NotificationSettings() {
   const inboxOnlyAvailable = supported && !!client && serverSupportsEmailPush();
   const upSupported = isUnifiedPushSupported();
   const [relayUrl, setRelayUrl] = useState(DEFAULT_RELAY_BASE_URL);
-  const [transport, setTransport] = useState<PushTransport>('fcm');
+  const [transport, setTransport] = useState<PushTransport>(supportsFcm ? 'fcm' : 'unifiedpush');
   const [distributors, setDistributors] = useState<string[]>([]);
   const [savedDistributor, setSavedDistributor] = useState<string | null>(null);
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -156,7 +157,7 @@ export function NotificationSettings() {
       const upDistributors = upSupported ? await getUnifiedPushDistributors() : [];
       const upSaved = upSupported ? await getSavedUnifiedPushDistributor() : null;
       if (cancelled) return;
-      setTransport(storedTransport ?? 'fcm');
+      setTransport(supportsFcm ? storedTransport ?? 'fcm' : 'unifiedpush');
       setDistributors(upDistributors);
       setSavedDistributor(upSaved);
     })();
@@ -376,32 +377,35 @@ export function NotificationSettings() {
 
         {upSupported && (
           <>
-            <SettingItem
-              label={t('settings.notifications.push.transport_label', 'Delivery method')}
-              description={t(
-                'settings.notifications.push.transport_desc',
-                'How notifications reach this device: Google’s Firebase Cloud Messaging, or a UnifiedPush distributor app (such as ntfy) for Google-free delivery.',
-              )}
-            >
-              <View style={styles.row}>
-                <Button
-                  variant={transport === 'fcm' ? 'default' : 'outline'}
-                  size="sm"
-                  onPress={() => void handleSelectTransport('fcm')}
-                  disabled={busy}
-                >
-                  {t('settings.notifications.push.transport_fcm', 'Google (FCM)')}
-                </Button>
-                <Button
-                  variant={transport === 'unifiedpush' ? 'default' : 'outline'}
-                  size="sm"
-                  onPress={() => void handleSelectTransport('unifiedpush')}
-                  disabled={busy}
-                >
-                  {t('settings.notifications.push.transport_unifiedpush', 'UnifiedPush')}
-                </Button>
-              </View>
-            </SettingItem>
+            {/* A build without FCM has only UnifiedPush: nothing to choose. */}
+            {supportsFcm && (
+              <SettingItem
+                label={t('settings.notifications.push.transport_label', 'Delivery method')}
+                description={t(
+                  'settings.notifications.push.transport_desc',
+                  'How notifications reach this device: Google’s Firebase Cloud Messaging, or a UnifiedPush distributor app (such as ntfy) for Google-free delivery.',
+                )}
+              >
+                <View style={styles.row}>
+                  <Button
+                    variant={transport === 'fcm' ? 'default' : 'outline'}
+                    size="sm"
+                    onPress={() => void handleSelectTransport('fcm')}
+                    disabled={busy}
+                  >
+                    {t('settings.notifications.push.transport_fcm', 'Google (FCM)')}
+                  </Button>
+                  <Button
+                    variant={transport === 'unifiedpush' ? 'default' : 'outline'}
+                    size="sm"
+                    onPress={() => void handleSelectTransport('unifiedpush')}
+                    disabled={busy}
+                  >
+                    {t('settings.notifications.push.transport_unifiedpush', 'UnifiedPush')}
+                  </Button>
+                </View>
+              </SettingItem>
+            )}
             {transport === 'unifiedpush' && distributors.length === 0 && (
               <Text style={styles.errorText}>
                 {t(
