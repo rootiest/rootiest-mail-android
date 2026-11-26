@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Merged over upstream's manifest for the rootiest build flavor.
+
+     The launcher shows the short "Mail" (@string/launcher_label, scripts/brand.py) because "Rootiest Mail" is cut off
+     under the icon. The app keeps its full name everywhere else (Settings > Apps, the app switcher, Obtainium), as
+     Rootiest Notes does. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name="com.anonymous.bulwarkmobile.MainActivity"
+            android:label="@string/launcher_label" />
+    </application>
+</manifest>

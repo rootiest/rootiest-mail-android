@@ -5,10 +5,12 @@ import { useColors, useResolvedTheme } from '../../theme/colors';
 import { useLocaleStore } from '../../stores/locale-store';
 import { getAccountInitials } from '../../lib/avatar-utils';
 import LoginFrame from './LoginFrame';
+import { isRootiest } from '../../lib/rootiest';
+import { ROOTIEST_LOGO_DARK, ROOTIEST_LOGO_LIGHT } from '../../lib/rootiest-logo';
 
 // The white mark disappears on the light palette, so pick per theme.
-const LOGO_LIGHT = require('../../../assets/logos/Bulwark Logo Dark.png');
-const LOGO_DARK = require('../../../assets/logos/Bulwark Logo White.png');
+const LOGO_LIGHT = isRootiest ? ROOTIEST_LOGO_LIGHT : require('../../../assets/logos/Bulwark Logo Dark.png');
+const LOGO_DARK = isRootiest ? ROOTIEST_LOGO_DARK : require('../../../assets/logos/Bulwark Logo White.png');
 
 export type SigningInPhase = 'browser' | 'connecting' | 'pairing';
 
