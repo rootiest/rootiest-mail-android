@@ -11,7 +11,7 @@ import java.util.Properties
 // Bump for each Rootiest release on the same upstream version; reset to 1 after merging a new upstream release.
 // versionName is upstream's plus "-r<revision>" (0.1.96-r1), and versionCode is upstream's times 100 plus the
 // revision, so it keeps increasing across upstream releases.
-def rootiestRevision = 1
+def rootiestRevision = 2
 
 // Google push needs a Firebase project of our own, registered for dev.rootiest.mail. Until its
 // google-services.json is in src/rootiest/, the flavor builds without it: the Google services task is skipped and
