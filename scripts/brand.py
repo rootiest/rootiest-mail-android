@@ -9,6 +9,10 @@ script writes those overrides; after each upstream merge run it and review `git 
 - locales/rootiest/strings.json: the app's strings that name Bulwark, in every language, naming Rootiest Mail
   instead. src/i18n merges them over upstream's catalogs in the rootiest build. Each language's own translation is
   kept and only the name is swapped, so a string upstream adds or rewords is picked up on the next run.
+- values{,-night}/colors.xml: the launch screen's and the window's background, the theme's page colour.
+- src/theme/rootiest-theme.ts: the Rootiest theme (Catppuccin Mocha with the green accent, Latte with flamingo), from
+  the stylesheet rootiest-icons generates for the webmail (icons/themes/bulwark.css), so the app and the webmail
+  share one palette. Its id is the webmail theme's, so the webmail policy's default theme picks it here too.
 - drawable/ic_launcher_*.xml and mipmap-anydpi-v26/: the adaptive launcher icon, from rootiest-icons
   icons/color/rootiest-mail.svg (the swirl and the mail emblem) on Catppuccin Mocha base, with a themed
   (monochrome) layer.
@@ -36,6 +40,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT_RES = ROOT / "android/app/src/rootiest/res"
 ICON = "icons/color/rootiest-mail.svg"
+THEME_CSS = "icons/themes/bulwark.css"
+OUT_THEME = ROOT / "src/theme/rootiest-theme.ts"
 
 NAME = "Rootiest Mail"
 
@@ -157,6 +163,115 @@ def locale_outputs() -> dict[Path, str]:
     note = GENERATED.format(source="locales/*/common.json and locales/rn/*.json")
     text = json.dumps({"_comment": note, **result}, ensure_ascii=False, indent=2, sort_keys=False) + "\n"
     return {OUT_LOCALES: text}
+
+
+# ── Theme ─────────────────────────────────────────────────────────────────────────────────────────────────────
+
+# The webmail's colour variables -> the app's palette tokens, as src/theme/builtin-themes.ts maps the webmail themes.
+THEME_MAP = {
+    "primary": ["primary", "primaryDark", "textLink", "navActive"],
+    "primary-foreground": ["primaryForeground"],
+    "ring": ["primaryLight", "borderFocus"],
+    "accent": ["accent", "primaryBg", "primaryBgHover", "surfaceHover"],
+    "accent-foreground": ["accentForeground"],
+    "secondary": ["secondary", "surface"],
+    "secondary-foreground": ["secondaryForeground"],
+    "muted": ["muted", "surfaceActive"],
+    "muted-foreground": ["mutedForeground", "textSecondary", "textMuted", "read", "navInactive"],
+    "foreground": ["text"],
+    "background": ["background", "textInverse"],
+    "card": ["card"],
+    "card-foreground": ["cardForeground"],
+    "popover": ["popover"],
+    "popover-foreground": ["popoverForeground"],
+    "border": ["border", "borderLight"],
+    "destructive": ["error", "navBadge"],
+    "destructive-foreground": ["errorForeground"],
+    "success": ["success"],
+    "success-foreground": ["successForeground"],
+    "warning": ["warning"],
+    "warning-foreground": ["warningForeground"],
+    "info": ["info"],
+    "info-foreground": ["infoForeground"],
+    "selection": ["selection"],
+    "selection-foreground": ["selectionForeground"],
+    "unread": ["unread"],
+    **{f"chart-{n}": [f"chart{n}"] for n in range(1, 6)},
+}
+THEME_ID = "rootiest"
+# Where the app parts from the webmail's colours, for the 4.5:1 that src/theme/__tests__/theme-contrast.test.ts asks
+# of muted text on every ground (as upstream's own Catppuccin port does): Latte subtext0 (#6c6f85) reaches 4.37:1 on
+# base, so muted text is subtext1; and the webmail lays muted (surface0) at 30-50% over the page where the app paints
+# it solid, so muted is crust.
+THEME_FIXES = {"light": {"muted-foreground": "#5c5f77", "muted": "#dce0e8"}, "dark": {}}
+
+
+def css_block(css: str, selector: str) -> dict[str, str]:
+    """A selector's --color-* variables; a later one wins, as in the browser."""
+    match = re.search(re.escape(selector) + r"\s*\{(.*?)\}", css, re.S)
+    if not match:
+        sys.exit(f"brand.py: no {selector} block in {THEME_CSS}")
+    body = re.sub(r"/\*.*?\*/", "", match.group(1), flags=re.S)
+    return dict(re.findall(r"--color-([a-z0-9-]+)\s*:\s*([^;]+?)\s*;", body))
+
+
+def hex_rgb(value: str) -> tuple[int, ...]:
+    if not re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+        sys.exit(f"brand.py: unexpected colour {value!r} in {THEME_CSS}")
+    return tuple(int(value[i : i + 2], 16) for i in (1, 3, 5))
+
+
+def solid_colour(value: str, background: str) -> str:
+    """A colour as #rrggbb; color-mix() is worked out, and transparent means the page behind it (RN has no blending
+    of its own here, as builtin-themes.ts notes)."""
+    mix = re.fullmatch(r"color-mix\(in srgb,\s*(#[0-9a-fA-F]{6})\s+([\d.]+)%,\s*(#[0-9a-fA-F]{6}|transparent)\)", value)
+    if not mix:
+        hex_rgb(value)
+        return value.lower()
+    first, share, second = mix.group(1), float(mix.group(2)) / 100, mix.group(3)
+    a, b = hex_rgb(first), hex_rgb(background if second == "transparent" else second)
+    return "#" + "".join(f"{round(x * share + y * (1 - share)):02x}" for x, y in zip(a, b))
+
+
+def theme_outputs(icons: Path) -> dict[Path, str]:
+    css = (icons / THEME_CSS).read_text(encoding="utf-8")
+    modes = {"light": css_block(css, ":root"), "dark": css_block(css, ".dark")}
+    lines = [
+        f"// {GENERATED.format(source='rootiest-icons ' + THEME_CSS)}",
+        "// The Rootiest theme: the palette of the webmail's Rootiest theme, mapped onto the app's tokens as",
+        "// builtin-themes.ts maps the webmail themes. Listed first in the rootiest build, and its default.",
+        "import type { BuiltinTheme } from './builtin-themes';",
+        "",
+        "export const ROOTIEST_THEME: BuiltinTheme = {",
+        f"  id: '{THEME_ID}',",
+        "  name: 'Rootiest',",
+        "  description: 'The Rootiest palette: Catppuccin Mocha with the green accent, and Latte with flamingo',",
+    ]
+    for mode, variables in modes.items():
+        variables = variables | THEME_FIXES[mode]
+        background = variables["background"]
+        lines.append(f"  {mode}: {{")
+        for var, tokens in THEME_MAP.items():
+            if var not in variables:
+                sys.exit(f"brand.py: {THEME_CSS} has no --color-{var} for {mode}")
+            colour = solid_colour(variables[var], background)
+            lines += [f"    {token}: '{colour}'," for token in tokens]
+        lines.append("  },")
+    lines += ["};", ""]
+    outputs = {OUT_THEME: "\n".join(lines)}
+    # The launch screen and the window behind the first frame, in the theme's page colour, so opening the app doesn't
+    # flash upstream's white or near-black.
+    for mode, folder in (("light", "values"), ("dark", "values-night")):
+        page = solid_colour(modes[mode]["background"], "#000000")
+        outputs[OUT_RES / folder / "colors.xml"] = (
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            + xml_note(GENERATED.format(source="rootiest-icons " + THEME_CSS))
+            + "<resources>\n"
+            f'  <color name="splashscreen_background">{page}</color>\n'
+            f'  <color name="window_background">{page}</color>\n'
+            "</resources>\n"
+        )
+    return outputs
 
 
 # ── Icons ─────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -321,6 +436,10 @@ def main() -> int:
         outputs |= icon_outputs(args.icons)
     else:
         print(f"brand.py: {args.icons} has no {ICON}; icons skipped", file=sys.stderr)
+    if (args.icons / THEME_CSS).is_file():
+        outputs |= theme_outputs(args.icons)
+    else:
+        print(f"brand.py: {args.icons} has no {THEME_CSS}; theme skipped", file=sys.stderr)
 
     stale = [path for path, text in outputs.items() if not path.is_file() or path.read_text(encoding="utf-8") != text]
     if args.check:

@@ -20,6 +20,8 @@
 // radii, Elastic's dark task rail, Aurora's gradient mesh and frosted panes)
 // and the "Flat fields" design-system theme have no native counterpart.
 import type { ThemePalette } from './tokens';
+import { isRootiest } from '../lib/rootiest';
+import { ROOTIEST_THEME } from './rootiest-theme';
 
 export type PaletteOverride = Partial<Omit<ThemePalette, 'calendar' | 'tags'>>;
 
@@ -32,6 +34,8 @@ export interface BuiltinTheme {
 }
 
 export const BUILTIN_THEMES: BuiltinTheme[] = [
+  // Rootiest Mail: its own palette first (scripts/brand.py).
+  ...(isRootiest ? [ROOTIEST_THEME] : []),
   {
     id: 'builtin-qui',
     name: 'Qui',

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { BUILTIN_THEMES } from '../theme/builtin-themes';
+import { ROOTIEST_THEME } from '../theme/rootiest-theme';
+import { isRootiest } from '../lib/rootiest';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Identity } from '../api/types';
 import { getIdentities as fetchIdentities } from '../api/identity';
@@ -429,7 +431,8 @@ export const DEFAULT_PERSISTED: PersistedSettings = {
   showToolbarLabels: true,
   animationsEnabled: true,
   emailAlwaysLightMode: false,
-  activeThemeId: null,
+  // Rootiest Mail starts with its own palette, as the webmail does.
+  activeThemeId: isRootiest ? ROOTIEST_THEME.id : null,
   // a11y-reading:
   appFont: 'default',
   colorBlindPalette: false,

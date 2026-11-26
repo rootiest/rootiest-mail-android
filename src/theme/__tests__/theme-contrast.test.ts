@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DARK_COLORS, LIGHT_COLORS, type ThemePalette } from '../tokens';
 import { BUILTIN_THEMES } from '../builtin-themes';
+import { ROOTIEST_THEME } from '../rootiest-theme';
 
 // Text contrast of every built-in theme, light and dark (WCAG 1.4.3, webmail
 // 9f6c7b99c and lib/__tests__/theme-contrast.test.ts). Grey text used to sit
@@ -45,7 +46,8 @@ function ratio(fg: string, ground: string, page: string): number {
 const palettes: Array<[string, ThemePalette]> = [
   ['default light', LIGHT_COLORS],
   ['default dark', DARK_COLORS],
-  ...BUILTIN_THEMES.flatMap((theme): Array<[string, ThemePalette]> => [
+  // The Rootiest theme is listed only in the rootiest build; it is checked here all the same.
+  ...[...BUILTIN_THEMES, ROOTIEST_THEME].flatMap((theme): Array<[string, ThemePalette]> => [
     [`${theme.name} light`, { ...LIGHT_COLORS, ...theme.light } as ThemePalette],
     [`${theme.name} dark`, { ...DARK_COLORS, ...theme.dark } as ThemePalette],
   ]),
