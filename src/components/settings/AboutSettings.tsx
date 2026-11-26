@@ -15,7 +15,7 @@ import { buildIssueUrl, sourceCodeUrl, updateSourceUrl } from '../../lib/about-l
 import { helpLinks } from '../../lib/org-policy';
 import { usePolicyStore } from '../../stores/policy-store';
 import { APP_VERSION } from '../../lib/app-version';
-import { isRootiest, ROOTIEST_APP_NAME } from '../../lib/rootiest';
+import { isRootiest, ROOTIEST_APP_NAME, ROOTIEST_SOURCE_URL } from '../../lib/rootiest';
 import { ROOTIEST_LOGO_DARK, ROOTIEST_LOGO_LIGHT } from '../../lib/rootiest-logo';
 
 const LOGO_WHITE = isRootiest ? ROOTIEST_LOGO_DARK : require('../../../assets/logos/Bulwark Logo White.png');
@@ -25,7 +25,8 @@ const extra = (Constants.expoConfig?.extra ?? {}) as { commit?: string; sourceCo
 export const APP_NAME = isRootiest ? ROOTIEST_APP_NAME : Constants.expoConfig?.name ?? 'Bulwark';
 export { APP_VERSION };
 export const GIT_COMMIT = extra.commit ?? 'dev';
-const SOURCE_URL = sourceCodeUrl(extra.sourceCodeUrl);
+// Rootiest Mail links its own source, as AGPL §13 asks of a modified version.
+const SOURCE_URL = isRootiest ? ROOTIEST_SOURCE_URL : sourceCodeUrl(extra.sourceCodeUrl);
 
 function hostOf(url: string): string {
   try {
