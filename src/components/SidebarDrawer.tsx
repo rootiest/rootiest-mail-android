@@ -31,6 +31,7 @@ import {
 import { localizeMailboxName } from '../lib/mailbox-label';
 import { showUnifiedSection, unifiedViewOffered, visibleCrossViews } from '../lib/unified-section';
 import { generateAvatarColor, getAccountInitials } from '../lib/avatar-utils';
+import AccountAvatar from './AccountAvatar';
 import { jmapClient } from '../api/jmap-client';
 import {
   markMailboxesAsRead, emptyMailbox, createMailbox, updateMailbox, deleteMailbox,
@@ -949,9 +950,12 @@ export default function SidebarDrawer({ visible, onClose, docked = false }: Side
     () => getAccountInitials('', accountEmail),
     [accountEmail],
   );
+  // The account's own colour, as in the account menu below; the address picks
+  // one only for an account the registry doesn't list.
+  const activeAccountColor = accounts.find((a) => a.id === activeAccountId)?.avatarColor;
   const avatarBg = React.useMemo(
-    () => (accountEmail ? generateAvatarColor(accountEmail) : c.primary),
-    [accountEmail],
+    () => activeAccountColor ?? (accountEmail ? generateAvatarColor(accountEmail) : c.primary),
+    [activeAccountColor, accountEmail],
   );
   const hostname = React.useMemo(() => {
     if (!serverUrl) return '';
@@ -1003,9 +1007,13 @@ export default function SidebarDrawer({ visible, onClose, docked = false }: Side
             onPress={() => setAccountMenuOpen((v) => !v)}
             style={({ pressed }) => [styles.account, pressed && styles.accountPressed]}
           >
-            <View style={[styles.accountAvatar, { backgroundColor: avatarBg }]}>
-              <Text style={styles.accountAvatarText}>{initials}</Text>
-            </View>
+            <AccountAvatar
+              email={accountEmail}
+              color={avatarBg}
+              initials={initials}
+              size={36}
+              textStyle={styles.accountAvatarText}
+            />
             <View style={styles.accountInfo}>
               <Text style={styles.accountName} numberOfLines={1}>{username || t('settings.account.title', 'Account')}</Text>
               {hostLabel ? (
@@ -1064,11 +1072,13 @@ export default function SidebarDrawer({ visible, onClose, docked = false }: Side
                     ]}
                   >
                     <View style={styles.accountMenuAvatarWrap}>
-                      <View style={[styles.accountMenuAvatar, { backgroundColor: acc.avatarColor }]}>
-                        <Text style={styles.accountMenuAvatarText}>
-                          {getAccountInitials(acc.displayName, acc.email || acc.username)}
-                        </Text>
-                      </View>
+                      <AccountAvatar
+                        email={acc.email || acc.username}
+                        color={acc.avatarColor}
+                        initials={getAccountInitials(acc.displayName, acc.email || acc.username)}
+                        size={36}
+                        textStyle={styles.accountMenuAvatarText}
+                      />
                       {isActive && (
                         <View style={styles.accountMenuCheckBadge}>
                           <Check size={10} color={c.primaryForeground} strokeWidth={3} />
@@ -1546,11 +1556,6 @@ function makeStyles(c: ThemePalette) {
   },
   accountPressed: { backgroundColor: c.surfaceHover },
   accountChevronOpen: { transform: [{ rotate: '180deg' }] },
-  accountAvatar: {
-    width: 36, height: 36,
-    borderRadius: 18,
-    alignItems: 'center', justifyContent: 'center',
-  },
   accountAvatarText: {
     ...typography.bodySemibold,
     color: c.primaryForeground,
@@ -1592,11 +1597,6 @@ function makeStyles(c: ThemePalette) {
   accountMenuAvatarWrap: {
     position: 'relative',
     width: 36, height: 36,
-  },
-  accountMenuAvatar: {
-    width: 36, height: 36,
-    borderRadius: 18,
-    alignItems: 'center', justifyContent: 'center',
   },
   accountMenuAvatarText: {
     ...typography.caption,

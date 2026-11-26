@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
 import { ClipboardPaste, QrCode, Mail, Plus, Server } from '../../components/icons';
-import { spacing, radius, typography, type ThemePalette } from '../../theme/tokens';
+import { spacing, typography, type ThemePalette } from '../../theme/tokens';
 import { useColors, useResolvedTheme } from '../../theme/colors';
 import type { AccountEntry } from '../../stores/account-store';
 import { getAccountInitials } from '../../lib/avatar-utils';
+import AccountAvatar from '../../components/AccountAvatar';
 import { accountRowText, serverHostLabel } from '../../lib/account-utils';
 import { accountServerLine } from '../../lib/account-labels';
 import OptionTile from './OptionTile';
@@ -101,9 +102,13 @@ export default function ChooseStep({
             const server = accountServerLine(account, accounts);
             return (
               <View key={account.id} style={styles.accountRow}>
-                <View style={[styles.avatar, { backgroundColor: account.avatarColor }]}>
-                  <Text style={styles.avatarText}>{initialsOf(account)}</Text>
-                </View>
+                <AccountAvatar
+                  email={account.email || account.username}
+                  color={account.avatarColor}
+                  initials={initialsOf(account)}
+                  size={36}
+                  textStyle={styles.avatarText}
+                />
                 <View style={styles.accountText}>
                   <Text style={styles.accountName} numberOfLines={1}>
                     {rowText.title}
@@ -199,7 +204,6 @@ function makeStyles(c: ThemePalette) {
 
     accountList: { gap: spacing.md },
     accountRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-    avatar: { width: 36, height: 36, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
     avatarText: { ...typography.bodySemibold, color: c.primaryForeground },
     accountText: { flex: 1 },
     accountName: { ...typography.bodyMedium, color: c.text },
