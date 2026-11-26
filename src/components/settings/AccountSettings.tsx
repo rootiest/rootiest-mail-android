@@ -18,6 +18,7 @@ import { jmapClient } from '../../api/jmap-client';
 import { fetchMailQuota, type MailQuota } from '../../api/quota';
 import { MAX_ACCOUNTS, accountRowText, nonDefaultPort, serverHostLabel } from '../../lib/account-utils';
 import { toUnicodeEmail } from '../../lib/idn';
+import AccountAvatar from '../AccountAvatar';
 import type { RootStackParamList } from '../../navigation/types';
 
 function formatFileSize(bytes: number): string {
@@ -191,9 +192,13 @@ export function AccountSettings() {
             const rowText = accountRowText(a, accounts);
             return (
               <View key={a.id} style={[styles.row, index > 0 && styles.rowBorder]}>
-                <View style={[styles.avatar, { backgroundColor: a.avatarColor }]}>
-                  <Text style={styles.avatarText}>{(a.displayName || a.username).slice(0, 1).toUpperCase()}</Text>
-                </View>
+                <AccountAvatar
+                  email={a.email || a.username}
+                  color={a.avatarColor}
+                  initials={(a.displayName || a.username).slice(0, 1).toUpperCase()}
+                  size={32}
+                  textStyle={styles.avatarText}
+                />
                 <Pressable
                   style={{ flex: 1, minWidth: 0 }}
                   onPress={() => {
