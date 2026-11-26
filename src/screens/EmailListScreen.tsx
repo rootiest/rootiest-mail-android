@@ -108,6 +108,8 @@ import { setPromptListColumn } from '../lib/push-prompt-frame';
 import { OrgAnnouncementBanner } from '../components/OrgAnnouncementBanner';
 import { RefusedAccountPrompt } from '../components/RefusedAccountPrompt';
 import { useRefusedActiveAccount } from '../lib/refused-accounts';
+import { isRootiest } from '../lib/rootiest';
+import { ROOTIEST_LOGO_DARK, ROOTIEST_LOGO_LIGHT } from '../lib/rootiest-logo';
 
 // The server refuses keywords per message (a read-only shared folder;
 // Stalwart 1.0: over 128 bytes, or more than 100 on one message), and the
@@ -509,8 +511,8 @@ const emailKeyExtractor = rowKeyOf;
 /** Height of the undo bar plus a gap, for lifting the compose button. */
 const UNDO_BAR_CLEARANCE = 60;
 
-const LOGO_ON_LIGHT = require('../../assets/logos/Bulwark Logo Dark.png');
-const LOGO_ON_DARK = require('../../assets/logos/Bulwark Logo White.png');
+const LOGO_ON_LIGHT = isRootiest ? ROOTIEST_LOGO_LIGHT : require('../../assets/logos/Bulwark Logo Dark.png');
+const LOGO_ON_DARK = isRootiest ? ROOTIEST_LOGO_DARK : require('../../assets/logos/Bulwark Logo White.png');
 
 interface EmailListScreenProps {
   onEmailPress?: (email: Email) => void;

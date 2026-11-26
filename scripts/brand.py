@@ -5,7 +5,8 @@ The rootiest build flavor (android/app/rootiest.gradle) replaces upstream resour
 its own source set, so upstream's files stay untouched and merging a new Bulwark Mobile release stays cheap. This
 script writes those overrides; after each upstream merge run it and review `git diff`:
 
-- values/strings.xml: the app's name, and the label of its device-sync account in Android's settings.
+- values/strings.xml: the app's name, the launcher's short label (android/app/src/rootiest/AndroidManifest.xml), and
+  the label of its device-sync account in Android's settings.
 - locales/rootiest/strings.json: the app's strings that name Bulwark, in every language, naming Rootiest Mail
   instead. src/i18n merges them over upstream's catalogs in the rootiest build. Each language's own translation is
   kept and only the name is swapped, so a string upstream adds or rewords is picked up on the next run.
@@ -44,6 +45,8 @@ THEME_CSS = "icons/themes/bulwark.css"
 OUT_THEME = ROOT / "src/theme/rootiest-theme.ts"
 
 NAME = "Rootiest Mail"
+# Under the launcher icon, where "Rootiest Mail" is cut off; the full name stays everywhere else.
+LAUNCHER_LABEL = "Mail"
 
 LOCALES = ROOT / "locales"
 OUT_LOCALES = LOCALES / "rootiest/strings.json"
@@ -92,6 +95,8 @@ def string_outputs() -> dict[Path, str]:
         + xml_note(GENERATED.format(source=source))
         + "<resources>\n"
         f'  <string name="app_name">{NAME}</string>\n'
+        "  <!-- The launcher's label, under the icon. -->\n"
+        f'  <string name="launcher_label">{LAUNCHER_LABEL}</string>\n'
         "  <!-- Account type label of device sync, shown in Settings → Accounts. -->\n"
         f'  <string name="device_sync_account_label" translatable="false">{NAME}</string>\n'
         "</resources>\n"
