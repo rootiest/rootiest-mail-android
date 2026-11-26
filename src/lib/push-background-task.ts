@@ -20,6 +20,7 @@ import {
 import { singleLine } from './single-line';
 import { cleanPreview } from './preview-text';
 import { makeKeyedLane } from './lane';
+import { isRootiest, ROOTIEST_APP_NAME } from './rootiest';
 import {
   lastNotifiedKey,
   migrateLegacyPushKeys,
@@ -768,7 +769,7 @@ async function showPlainNotification(
     emailId: '',
     threadId: '',
     groupKey: 'bulwark-mail:plain',
-    groupTitle: label || 'Bulwark',
+    groupTitle: label || (isRootiest ? ROOTIEST_APP_NAME : 'Bulwark'),
   });
 }
 

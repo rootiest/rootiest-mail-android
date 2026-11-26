@@ -10,6 +10,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
  * itself (lib/platform-capabilities). `fcmAvailable` is false in a build
  * without a google-services.json for its package (the rootiest flavor until
  * it has a Firebase project), which can only push over UnifiedPush.
+ * `versionName` is the build's own (the rootiest flavor adds "-r<revision>").
  */
 class BulwarkBuildModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     override fun getName() = "BulwarkBuild"
@@ -17,5 +18,6 @@ class BulwarkBuildModule(reactContext: ReactApplicationContext) : ReactContextBa
     override fun getConstants(): Map<String, Any> = mapOf(
         "distribution" to BuildConfig.DISTRIBUTION,
         "fcmAvailable" to BuildConfig.FCM_AVAILABLE,
+        "versionName" to BuildConfig.VERSION_NAME,
     )
 }

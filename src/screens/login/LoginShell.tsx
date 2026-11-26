@@ -8,15 +8,15 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Constants from 'expo-constants';
 import { ArrowLeft, X } from '../../components/icons';
 import { spacing, typography, componentSizes, type ThemePalette } from '../../theme/tokens';
 import { useColors } from '../../theme/colors';
 import { useLocaleStore } from '../../stores/locale-store';
 import LoginFrame from './LoginFrame';
+import { isRootiest, ROOTIEST_APP_NAME } from '../../lib/rootiest';
+import { APP_VERSION } from '../../lib/app-version';
 import { LoginLanguagePicker } from './LoginLanguagePicker';
 
-const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
 
 interface LoginShellProps {
   children: React.ReactNode;
@@ -93,7 +93,7 @@ export default function LoginShell({
 
         {showFooter ? (
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Bulwark Mobile v{APP_VERSION}</Text>
+            <Text style={styles.footerText}>{isRootiest ? ROOTIEST_APP_NAME : 'Bulwark Mobile'} v{APP_VERSION}</Text>
           </View>
         ) : null}
       </KeyboardAvoidingView>
