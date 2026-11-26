@@ -1,20 +1,25 @@
+# GitHub-only workflow. Why Gitea could not run it: the type check alone peaks at about 1.8 GB and ran out of
+# Node heap on our Gitea runner, the Android build needs the Android SDK and several GB more, and there is no
+# heavy-build Gitea runner (hestia's were removed 2026-10-09). GitHub's ubuntu image carries
+# the SDK with its licences accepted.
+# It runs on the branches the Gitea push mirror copies to GitHub.
 name: CI
 
 on:
   push:
-    branches: [main, 'catch-up-*']
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
+    if: github.server_url == 'https://github.com'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
