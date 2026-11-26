@@ -51,7 +51,8 @@ release based on Bulwark Mobile 0.1.96.
 
 ## Building
 
-You need Node 22, JDK 17 and the Android SDK, with `ANDROID_HOME` set (and no `ANDROID_SDK_ROOT` pointing elsewhere).
+You need Node 22, JDK 17 and the Android SDK, with `sdk.dir` set in `android/local.properties` (Gradle reads it before
+`ANDROID_HOME`, and it's not committed) or `ANDROID_HOME` set.
 
 ```sh
 npm ci
