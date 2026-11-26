@@ -40,6 +40,10 @@ class BulwarkFcmModule(reactContext: ReactApplicationContext)
 
     @ReactMethod
     fun getToken(promise: Promise) {
+        if (!BuildConfig.FCM_AVAILABLE) {
+            promise.reject("fcm_unavailable", "This build has no Firebase project")
+            return
+        }
         FirebaseMessaging.getInstance().token
             .addOnSuccessListener { token -> promise.resolve(token) }
             .addOnFailureListener { err -> promise.reject("fcm_token_failed", err) }
@@ -47,6 +51,10 @@ class BulwarkFcmModule(reactContext: ReactApplicationContext)
 
     @ReactMethod
     fun deleteToken(promise: Promise) {
+        if (!BuildConfig.FCM_AVAILABLE) {
+            promise.resolve(null)
+            return
+        }
         FirebaseMessaging.getInstance().deleteToken()
             .addOnSuccessListener { promise.resolve(null) }
             .addOnFailureListener { err -> promise.reject("fcm_delete_failed", err) }

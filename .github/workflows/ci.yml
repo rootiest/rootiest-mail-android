@@ -29,3 +29,40 @@ jobs:
 
       - name: Unit tests
         run: npm test
+
+      # The generated Rootiest resources match scripts/brand.py (the icons need a rootiest-icons checkout, so
+      # only the strings are checked here).
+      - name: Rootiest resources
+        run: python3 scripts/brand.py --check
+
+  build:
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci
+
+      # Debug-signed, arm64 (upstream's reactNativeArchitectures): installs on phones to try a branch.
+      - name: Build the Rootiest Mail debug APK
+        working-directory: android
+        run: ./gradlew --no-daemon assembleRootiestDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rootiest-mail-debug-apk
+          path: android/app/build/outputs/apk/rootiest/debug/*.apk
+          retention-days: 14

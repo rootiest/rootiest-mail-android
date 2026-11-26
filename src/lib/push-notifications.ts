@@ -1,5 +1,7 @@
 import { NativeEventEmitter, NativeModules, PermissionsAndroid, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isRootiest, ROOTIEST_RELAY_BASE_URL } from './rootiest';
+import { supportsFcm } from './platform-capabilities';
 import {
   createPushSubscription,
   destroyPushSubscription,
@@ -273,7 +275,7 @@ export async function migrateLegacyPushKeys(): Promise<void> {
 // Hosted relay so users don't need to run their own Firebase project. The
 // relay only ever sees FCM tokens + JMAP state-id hashes - no mail content.
 // Power users can override this from the settings screen.
-export const DEFAULT_RELAY_BASE_URL = 'https://notifications.relay.bulwarkmail.org';
+export const DEFAULT_RELAY_BASE_URL = isRootiest ? ROOTIEST_RELAY_BASE_URL : 'https://notifications.relay.bulwarkmail.org';
 
 /**
  * A relay must be reachable over TLS: the registration carries the FCM token
@@ -783,6 +785,8 @@ export async function setStoredPushTransport(transport: PushTransport | null): P
 export async function getEffectivePushTransport(): Promise<PushTransport> {
   // iOS has one way in: APNs, through the relay.
   if (Platform.OS === 'ios') return 'apns';
+  // A build without FCM pushes over UnifiedPush, whatever was stored.
+  if (!supportsFcm) return 'unifiedpush';
   return (await getStoredPushTransport()) ?? 'fcm';
 }
 
