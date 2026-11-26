@@ -23,7 +23,7 @@ const TRANSLATED_FILES: Record<string, string[]> = {
   'screens/login/ConfirmStep.tsx': [],
   'screens/login/EmailStep.tsx': [],
   'screens/login/LoginNotice.tsx': [],
-  'screens/login/LoginShell.tsx': ['Bulwark Mobile v'],
+  'screens/login/LoginShell.tsx': ['Bulwark Mobile'],
   'screens/login/OptionTile.tsx': [],
   'screens/login/PasswordStep.tsx': [],
   'screens/login/ServerStep.tsx': ['mail.example.com'],

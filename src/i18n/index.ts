@@ -17,6 +17,7 @@ import en from '../../locales/en/common.json';
 // is complete; a key another language has not translated yet falls through
 // to it via the en fallback in translate().
 import rnEn from '../../locales/rn/en.json';
+import { isRootiest, rootiestStrings } from '../lib/rootiest';
 
 export type { MessageParams } from './format';
 
@@ -182,6 +183,8 @@ export function getDictionary(locale: LocaleCode, plain = false): Dictionary {
   let dict = dictionaries[locale];
   if (!dict) {
     dict = deepMerge(CATALOG_LOADERS[locale](), OVERLAY_LOADERS[locale]());
+    // Rootiest Mail: its own name in the strings that name the app (scripts/brand.py).
+    if (isRootiest) dict = deepMerge(dict, rootiestStrings(locale));
     dictionaries[locale] = dict;
   }
   const loadPlain = plain ? PLAIN_LOADERS[locale] : undefined;

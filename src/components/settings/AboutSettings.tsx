@@ -14,14 +14,16 @@ import { supportsSideloadUpdates } from '../../lib/platform-capabilities';
 import { buildIssueUrl, sourceCodeUrl, updateSourceUrl } from '../../lib/about-links';
 import { helpLinks } from '../../lib/org-policy';
 import { usePolicyStore } from '../../stores/policy-store';
+import { APP_VERSION } from '../../lib/app-version';
 import { isRootiest, ROOTIEST_APP_NAME } from '../../lib/rootiest';
+import { ROOTIEST_LOGO_DARK, ROOTIEST_LOGO_LIGHT } from '../../lib/rootiest-logo';
 
-const LOGO_WHITE = require('../../../assets/logos/Bulwark Logo White.png');
-const LOGO_COLOR = require('../../../assets/logos/Bulwark Logo Color.png');
+const LOGO_WHITE = isRootiest ? ROOTIEST_LOGO_DARK : require('../../../assets/logos/Bulwark Logo White.png');
+const LOGO_COLOR = isRootiest ? ROOTIEST_LOGO_LIGHT : require('../../../assets/logos/Bulwark Logo Color.png');
 
 const extra = (Constants.expoConfig?.extra ?? {}) as { commit?: string; sourceCodeUrl?: string };
 export const APP_NAME = isRootiest ? ROOTIEST_APP_NAME : Constants.expoConfig?.name ?? 'Bulwark';
-export const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
+export { APP_VERSION };
 export const GIT_COMMIT = extra.commit ?? 'dev';
 const SOURCE_URL = sourceCodeUrl(extra.sourceCodeUrl);
 
