@@ -20,6 +20,9 @@ export const isRootiest: boolean = (() => {
 /** The app's name, as the launcher shows it (scripts/brand.py). */
 export const ROOTIEST_APP_NAME = 'Rootiest Mail';
 
+/** This app's source code. */
+export const ROOTIEST_SOURCE_URL = 'https://git.rootiest.dev/rootiest/rootiest-mail-android';
+
 /** Rootiest's own push relay, the default in place of the hosted Bulwark one. */
 export const ROOTIEST_RELAY_BASE_URL = 'https://relay.rootiest.dev';
 
