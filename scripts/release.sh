@@ -38,10 +38,11 @@ command -v gt >/dev/null || die "gt (the Gitea CLI, package gitea-cli) is not in
 export GITEA_INSTANCE_URL=${GITEA_INSTANCE_URL:-https://git.rootiest.dev}
 [ -z "$(git ls-remote --tags origin "refs/tags/$tag")" ] || die "$tag exists already: bump rootiestRevision"
 
-# The build needs JDK 17 (Gradle here cannot run on newer ones) and one SDK location: ANDROID_SDK_ROOT pointing
-# elsewhere than ANDROID_HOME stops it.
-export ANDROID_HOME=${ANDROID_HOME:-$HOME/Android/Sdk}
-unset ANDROID_SDK_ROOT
+# The build needs JDK 17 (Gradle here cannot run on newer ones). The SDK is android/local.properties' sdk.dir, which
+# Gradle reads before ANDROID_HOME (README, "Building").
+sdk=$(sed -n 's/^sdk.dir=//p' android/local.properties 2>/dev/null || true)
+sdk=${sdk:-${ANDROID_HOME:-}}
+[ -d "$sdk/build-tools" ] || die "no Android SDK: set sdk.dir in android/local.properties or ANDROID_HOME"
 if ! "${JAVA_HOME:-/nonexistent}/bin/java" -version 2>&1 | grep -q '"17\.'; then
   jdk=$(ls -d "$HOME"/.gradle/jdks/*17* 2>/dev/null | grep -v '\.lock$' | grep -v '\.tar\.gz$' | head -1 || true)
   [ -n "$jdk" ] || die "no JDK 17: set JAVA_HOME to one"
@@ -53,8 +54,8 @@ npm ci --no-audit --no-fund --silent
 (cd android && ./gradlew --no-daemon -q assembleRootiestRelease)
 apk=android/app/build/outputs/apk/rootiest/release/app-rootiest-release.apk
 
-apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)
-[ -x "$apksigner" ] || die "apksigner not found under $ANDROID_HOME/build-tools"
+apksigner=$(ls -d "$sdk"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)
+[ -x "$apksigner" ] || die "apksigner not found under $sdk/build-tools"
 got=$("$apksigner" verify --print-certs "$apk" 2>/dev/null | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
 [ "$got" = "$CERT" ] || die "$apk is not signed with the release key (got ${got:-nothing}); is rootiest.mail.signing set in ~/.gradle/gradle.properties?"
 
