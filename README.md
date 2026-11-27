@@ -21,8 +21,9 @@ What it changes from Bulwark Mobile:
 - **Colors:** its default theme is the Rootiest palette, the same as the Rootiest webmail's: Catppuccin Mocha with a green
   accent in dark mode, and Latte with a flamingo accent in light mode.
 - **Account avatars:** the account lists show the photo of the contact with the account's own address, as the webmail does.
-- **Notifications:** they come through Rootiest's own push relay (`relay.rootiest.dev`). This build has no Google push
-  yet, so notifications need a [UnifiedPush](https://unifiedpush.org) distributor such as [ntfy](https://ntfy.sh).
+- **Notifications:** they come through Rootiest's own push relay (`relay.rootiest.dev`), by Google push (Firebase
+  project `rootiest-mail`) by default, or by [UnifiedPush](https://unifiedpush.org) through a distributor such as
+  [ntfy](https://ntfy.sh). Settings › Notifications switches between them.
 - **Updates:** it has no built-in updater. Releases are published here for [Obtainium](https://obtainium.imranr.dev).
 - **Source:** Settings › About links to this repository.
 

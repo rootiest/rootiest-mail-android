@@ -11,11 +11,12 @@ import java.util.Properties
 // Bump for each Rootiest release on the same upstream version; reset to 1 after merging a new upstream release.
 // versionName is upstream's plus "-r<revision>" (0.1.96-r1), and versionCode is upstream's times 100 plus the
 // revision, so it keeps increasing across upstream releases.
-def rootiestRevision = 2
+def rootiestRevision = 3
 
-// Google push needs a Firebase project of our own, registered for dev.rootiest.mail. Until its
-// google-services.json is in src/rootiest/, the flavor builds without it: the Google services task is skipped and
-// BuildConfig.FCM_AVAILABLE tells the app to offer UnifiedPush only.
+// Google push goes through our Firebase project (rootiest-mail), registered for dev.rootiest.mail; its
+// google-services.json is in src/rootiest/. relay.rootiest.dev sends with that project's service account. A
+// build without the file (a fork) skips the Google services task, and BuildConfig.FCM_AVAILABLE
+// tells the app to offer UnifiedPush only.
 def rootiestFirebase = file('src/rootiest/google-services.json').isFile()
 
 // Release signing: the key's properties file (storeFile, storePassword, keyAlias, keyPassword), named by the Gradle
