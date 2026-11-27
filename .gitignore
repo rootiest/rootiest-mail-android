@@ -63,3 +63,5 @@ yarn-error.*
 /android/build-release.log
 /android/expo*.log
 /android/metro.log
+# the Google Play bundle scripts/release.sh leaves for Play Console
+/build/play/
