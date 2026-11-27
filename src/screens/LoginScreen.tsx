@@ -39,6 +39,7 @@ import { loginBackAction } from './login/login-back';
 import { reauthStart, type LoginStepName } from './login/reauth-start';
 import { isSignInCancelled } from '../lib/sign-in-abort';
 import { distinctServerUrls } from '../lib/account-labels';
+import { isRootiest, ROOTIEST_SERVER_URL } from '../lib/rootiest';
 
 interface LoginScreenProps {
   onLogin?: () => void;
@@ -89,6 +90,7 @@ export default function LoginScreen({ onLogin, isAddMode = false, onCancel }: Lo
   const loginWithToken = useAuthStore((state) => state.loginWithToken);
   const loginViaWebmail = useAuthStore((state) => state.loginViaWebmail);
   const loginViaPairing = useAuthStore((state) => state.loginViaPairing);
+  const loginViaRootiestId = useAuthStore((state) => state.loginViaRootiestId);
   const clearError = useAuthStore((state) => state.clearError);
   const storeError = useAuthStore((state) => state.error);
 
@@ -360,6 +362,26 @@ export default function LoginScreen({ onLogin, isAddMode = false, onCancel }: Lo
     },
     [beginAttempt, continueWithSecondFactor, endAttempt, finishIfSignedIn, isAddMode, loginViaWebmail, t],
   );
+
+  // Rootiest Mail: RootiestID in the browser, straight to Rootiest's server.
+  const runRootiestId = React.useCallback(async () => {
+    setNotice(null);
+    setServerUrl(ROOTIEST_SERVER_URL);
+    const attempt = beginAttempt();
+    setBusy('browser');
+    const wasAuthenticated = useAuthStore.getState().isAuthenticated;
+    try {
+      await loginViaRootiestId({ addAccount: isAddMode, signal: attempt.signal });
+      if (!isLive(attempt)) return;
+      // Closing the browser resolves quietly: leave them where they were.
+      finishIfSignedIn(wasAuthenticated);
+    } catch (err) {
+      if (!isLive(attempt) || isSignInCancelled(err)) return;
+      setNotice(describeLoginError(err, { serverUrl: ROOTIEST_SERVER_URL, t }));
+    } finally {
+      if (endAttempt(attempt)) setBusy(null);
+    }
+  }, [beginAttempt, endAttempt, finishIfSignedIn, isAddMode, loginViaRootiestId, t]);
 
   const handleEmailContinue = React.useCallback(async () => {
     const value = email.trim();
@@ -691,6 +713,7 @@ export default function LoginScreen({ onLogin, isAddMode = false, onCancel }: Lo
               setFailedDomain(null);
               goTo('server');
             }}
+            onRootiestId={isRootiest ? () => void runRootiestId() : undefined}
           />
         </LoginShell>
         {modals}

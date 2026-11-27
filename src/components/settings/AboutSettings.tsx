@@ -11,11 +11,11 @@ import { useAuthStore } from '../../stores/auth-store';
 import { useAccountStore } from '../../stores/account-store';
 import { useUpdatesStore } from '../../stores/updates-store';
 import { supportsSideloadUpdates } from '../../lib/platform-capabilities';
-import { buildIssueUrl, sourceCodeUrl, updateSourceUrl } from '../../lib/about-links';
+import { buildIssueUrl, describePlatform, sourceCodeUrl, updateSourceUrl } from '../../lib/about-links';
 import { helpLinks } from '../../lib/org-policy';
 import { usePolicyStore } from '../../stores/policy-store';
 import { APP_VERSION } from '../../lib/app-version';
-import { isRootiest, ROOTIEST_APP_NAME, ROOTIEST_SOURCE_URL } from '../../lib/rootiest';
+import { BULWARK_MOBILE_URL, isRootiest, ROOTIEST_APP_NAME, ROOTIEST_SOURCE_URL, rootiestSupportUrl } from '../../lib/rootiest';
 import { ROOTIEST_LOGO_DARK, ROOTIEST_LOGO_LIGHT } from '../../lib/rootiest-logo';
 
 const LOGO_WHITE = isRootiest ? ROOTIEST_LOGO_DARK : require('../../../assets/logos/Bulwark Logo White.png');
@@ -100,15 +100,15 @@ export function AboutSettings({ onOpen }: AboutSettingsProps) {
 
   const reportProblem = () => {
     const constants = Platform.constants as { Release?: string; Model?: string };
-    void Linking.openURL(buildIssueUrl(
-      { version: APP_VERSION, commit: GIT_COMMIT },
-      {
-        os: Platform.OS,
-        osVersion: Platform.Version,
-        release: constants.Release,
-        model: constants.Model,
-      },
-    ));
+    const device = {
+      os: Platform.OS,
+      osVersion: Platform.Version,
+      release: constants.Release,
+      model: constants.Model,
+    };
+    const app = { version: APP_VERSION, commit: GIT_COMMIT };
+    // Rootiest Mail: a ticket on Rootiest's support desk, not an issue on upstream's GitHub.
+    void Linking.openURL(isRootiest ? rootiestSupportUrl(app, describePlatform(device)) : buildIssueUrl(app, device));
   };
 
   return (
@@ -144,6 +144,16 @@ export function AboutSettings({ onOpen }: AboutSettingsProps) {
           <Text style={styles.sourceText}>{t('settings.about.source_code', 'Source code')}</Text>
           <ExternalLink size={14} color={c.mutedForeground} />
         </Pressable>
+        {isRootiest ? (
+          <Pressable
+            onPress={() => void Linking.openURL(BULWARK_MOBILE_URL)}
+            accessibilityRole="link"
+            style={styles.sourceLink}
+          >
+            <Text style={styles.sourceText}>{t('settings.about.based_on_bulwark', 'Based on Bulwark Mobile')}</Text>
+            <ExternalLink size={14} color={c.mutedForeground} />
+          </Pressable>
+        ) : null}
       </View>
 
       <SettingsSection
@@ -184,7 +194,9 @@ export function AboutSettings({ onOpen }: AboutSettingsProps) {
         ))}
         <SettingItem
           label={t('settings.about.report_problem', 'Report a problem')}
-          description={t('settings.about.report_problem_desc', 'Opens an issue on GitHub with the version filled in')}
+          description={isRootiest
+            ? t('settings.about.report_problem_desc_rootiest', 'Opens a support request with the version filled in')
+            : t('settings.about.report_problem_desc', 'Opens an issue on GitHub with the version filled in')}
           onPress={reportProblem}
           link="external"
           noBorder

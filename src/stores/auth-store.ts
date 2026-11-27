@@ -38,6 +38,8 @@ import {
   type OAuthTokens,
 } from '../lib/oauth';
 import { discoverOAuthMetadata, endProviderSession, loginWithPkce, probeWebmail, revokeRefreshToken } from '../lib/oauth-native';
+import { rootiestIdSignIn } from '../lib/rootiest-signin';
+import { ROOTIEST_SERVER_URL } from '../lib/rootiest';
 import {
   teardownPushNotifications,
   teardownPushNotificationsForAccount,
@@ -125,6 +127,8 @@ export interface AuthState {
   /** Access-token (Bearer) sign-in with a token the user pasted, e.g. a Fastmail API token. */
   loginWithToken: (serverUrl: string, token: string, opts?: SignInOptions) => Promise<void>;
   loginViaWebmail: (webmailUrl: string, opts?: SignInOptions) => Promise<void>;
+  /** Rootiest Mail: RootiestID sign-in in the browser with the app's own client (lib/rootiest-signin). */
+  loginViaRootiestId: (opts?: SignInOptions) => Promise<void>;
   /** OAuth/OIDC (PKCE) straight against the mail server's authorization server. */
   loginViaOAuth: (serverUrl: string, opts?: SignInOptions) => Promise<void>;
   loginViaPairing: (webmailUrl: string, code: string, opts?: SignInOptions) => Promise<void>;
@@ -882,6 +886,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     try {
       await completeOAuthHandoff(set, get, { flow: 'oauth', serverUrl: base, tokens }, opts);
+    } catch (err) {
+      set({ isLoading: false, error: oauthSignInMessage(err) });
+      throw err;
+    }
+  },
+
+  loginViaRootiestId: async (opts) => {
+    set({ isLoading: true, error: null });
+    refuseAddWhenFull(set, opts);
+    let tokens;
+    try {
+      tokens = await rootiestIdSignIn({ addAccount: opts?.addAccount });
+      cancelledSignIn(set, opts);
+    } catch (err) {
+      if (err instanceof HandoffCancelledError) {
+        set({ isLoading: false, error: null });
+        return;
+      }
+      if (isSignInCancelled(err)) throw err;
+      const message = err instanceof Error ? err.message : 'Sign-in failed';
+      set({ isLoading: false, error: message });
+      throw err;
+    }
+    try {
+      await completeOAuthHandoff(set, get, { flow: 'oauth', serverUrl: ROOTIEST_SERVER_URL, tokens }, opts);
     } catch (err) {
       set({ isLoading: false, error: oauthSignInMessage(err) });
       throw err;

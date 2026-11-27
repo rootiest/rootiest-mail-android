@@ -27,6 +27,7 @@ import {
 } from './totp-login';
 import { randomHex } from './random';
 import { NetworkError } from '../api/jmap-client';
+import { isRootiestIdToken } from './rootiest';
 
 export interface OAuthMetadata {
   issuer?: string;
@@ -345,6 +346,8 @@ let endSessionQueue: Promise<void> = Promise.resolve();
  */
 export function endProviderSession(serverUrl: string, tokens: OAuthTokens): Promise<void> {
   if (tokens.source !== 'native') return Promise.resolve();
+  // Rootiest Mail: RootiestID's session is the one for every Rootiest service (lib/rootiest).
+  if (isRootiestIdToken(tokens)) return Promise.resolve();
   const run = async () => {
     try {
       const metadata = await discoverOAuthMetadata(serverUrl);
@@ -365,6 +368,8 @@ export function endProviderSession(serverUrl: string, tokens: OAuthTokens): Prom
  */
 export async function revokeRefreshToken(serverUrl: string, tokens: OAuthTokens): Promise<void> {
   if (!tokens.refreshToken) return;
+  // Rootiest Mail: RootiestID has no revocation endpoint, and the mail server's isn't the token's (lib/rootiest).
+  if (isRootiestIdToken(tokens)) return;
   try {
     const metadata = await discoverOAuthMetadata(serverUrl);
     const endpoint = metadata?.revocation_endpoint;

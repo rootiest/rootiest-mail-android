@@ -982,6 +982,9 @@
       "qr_title": "Sign-in code",
       "reauth_detail": "The server no longer accepts the saved sign-in for {account}. Sign in again to keep using this account.",
       "reauth_title": "Sign in again",
+      "rootiest_id_add_title": "Another RootiestID account",
+      "rootiest_id_desc": "Your Rootiest account, in the browser. No setup needed",
+      "rootiest_id_title": "Sign in with RootiestID",
       "scan_desc": "The fastest way in if you're signed in on the web",
       "scan_title": "Scan a sign-in code",
       "server_cert_active": "Signing in with the client certificate \"{alias}\". Tap to choose another.",
@@ -1092,6 +1095,7 @@
   },
   "settings": {
     "about": {
+      "based_on_bulwark": "Based on Bulwark Mobile",
       "check_now": "Check now",
       "checked_at": "Checked {when}",
       "licences": "Open-source licenses",
@@ -1101,6 +1105,7 @@
       "privacy_desc": "What stays on this device and what goes to your server",
       "report_problem": "Report a problem",
       "report_problem_desc": "Opens an issue on GitHub with the version filled in",
+      "report_problem_desc_rootiest": "Opens a support request with the version filled in",
       "server": "Server",
       "server_value": "{host} · signed in as {user}",
       "source_code": "Source code",
