@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "181054920852",
+    "project_id": "rootiest-mail",
+    "storage_bucket": "rootiest-mail.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181054920852:android:e8a90add2a7885f3e4bc81",
+        "android_client_info": {
+          "package_name": "dev.rootiest.mail"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5pKITDrPF2ERzFklnGdFbyhhO74I_7Lk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
