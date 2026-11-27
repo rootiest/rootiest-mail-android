@@ -174,8 +174,8 @@ def locale_outputs() -> dict[Path, str]:
 
 # The webmail's colour variables -> the app's palette tokens, as src/theme/builtin-themes.ts maps the webmail themes.
 THEME_MAP = {
-    "primary": ["primary", "primaryDark", "textLink", "navActive"],
-    "primary-foreground": ["primaryForeground"],
+    "primary": ["primary", "primaryDark", "textLink", "navActive", "fab"],
+    "primary-foreground": ["primaryForeground", "fabForeground"],
     "ring": ["primaryLight", "borderFocus"],
     "accent": ["accent", "primaryBg", "primaryBgHover", "surfaceHover"],
     "accent-foreground": ["accentForeground"],

@@ -102,6 +102,11 @@ export interface ThemePalette {
   popover: string;
   popoverForeground: string;
 
+  // Floating action buttons (new mail, new event). Unset, they use the text colour with the background colour
+  // on top, as the webmail's mobile button does; a theme sets them to put its accent there instead.
+  fab?: string;
+  fabForeground?: string;
+
   // Charts
   chart1: string; chart2: string; chart3: string; chart4: string; chart5: string;
 }
