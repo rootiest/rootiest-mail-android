@@ -2087,7 +2087,7 @@ export default function EmailListScreen({
         accessibilityRole="button"
         accessibilityLabel={t('sidebar.mobile.compose', 'Compose')}
       >
-        <SquarePen size={24} color={c.background} />
+        <SquarePen size={24} color={c.fabForeground ?? c.background} />
       </Pressable>
 
       {!sidebarDocked && <SidebarDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />}
@@ -3067,7 +3067,7 @@ function makeStyles(c: ThemePalette) {
     width: componentSizes.fab,       // 56px (h-14)
     height: componentSizes.fab,      // 56px (w-14)
     borderRadius: radius.full,       // rounded-full (circle)
-    backgroundColor: c.text,    // white - matches webmail mobile FAB
+    backgroundColor: c.fab ?? c.text,    // white - matches webmail mobile FAB, unless the theme sets fab
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,

@@ -94,10 +94,10 @@ export function CalendarFab({ onNewEvent, onNewTask }: CalendarFabProps) {
             accessibilityLabel={t('calendar.events.new_event', 'New event')}
           >
             {open ? (
-              <CalendarPlus size={24} color={c.background} />
+              <CalendarPlus size={24} color={c.fabForeground ?? c.background} />
             ) : (
               <Animated.View style={{ transform: [{ rotate }] }}>
-                <Plus size={26} color={c.background} />
+                <Plus size={26} color={c.fabForeground ?? c.background} />
               </Animated.View>
             )}
           </Pressable>
@@ -143,7 +143,7 @@ function makeStyles(c: ThemePalette) {
       width: componentSizes.fab,
       height: componentSizes.fab,
       borderRadius: radius.full,
-      backgroundColor: c.text,
+      backgroundColor: c.fab ?? c.text,
       alignItems: 'center',
       justifyContent: 'center',
       elevation: 6,
