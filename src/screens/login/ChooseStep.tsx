@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
-import { ClipboardPaste, QrCode, Mail, Plus, Server } from '../../components/icons';
+import { ClipboardPaste, KeyRound, QrCode, Mail, Plus, Server } from '../../components/icons';
 import { spacing, typography, type ThemePalette } from '../../theme/tokens';
 import { useColors, useResolvedTheme } from '../../theme/colors';
 import type { AccountEntry } from '../../stores/account-store';
@@ -33,6 +33,8 @@ interface ChooseStepProps {
   onUseEmail: () => void;
   onUseKnownServer: (serverUrl: string) => void;
   onManualSetup: () => void;
+  /** Rootiest Mail: sign in with RootiestID in the browser. Offered first when set. */
+  onRootiestId?: () => void;
   notice?: { title: string; detail?: string } | null;
   disabled?: boolean;
 }
@@ -54,6 +56,7 @@ export default function ChooseStep({
   onUseEmail,
   onUseKnownServer,
   onManualSetup,
+  onRootiestId,
   notice,
   disabled = false,
 }: ChooseStepProps) {
@@ -139,11 +142,23 @@ export default function ChooseStep({
       ) : null}
 
       <View style={styles.options}>
+        {onRootiestId ? (
+          <OptionTile
+            emphasis="primary"
+            title={isAddMode
+              ? t('login.mobile.rootiest_id_add_title', 'Another RootiestID account')
+              : t('login.mobile.rootiest_id_title', 'Sign in with RootiestID')}
+            description={t('login.mobile.rootiest_id_desc', 'Your Rootiest account, in the browser. No setup needed')}
+            renderIcon={(color, size) => <KeyRound size={size} color={color} />}
+            onPress={onRootiestId}
+            disabled={disabled}
+          />
+        ) : null}
         {hasKnownServer ? (
           knownServerUrls.map((url, i) => (
             <OptionTile
               key={url}
-              emphasis={i === 0 ? 'primary' : undefined}
+              emphasis={i === 0 && !onRootiestId ? 'primary' : undefined}
               title={t('login.mobile.known_server_title', 'Another account on {host}', { host: serverHostLabel(url) })}
               description={t('login.mobile.known_server_desc', "We already know this server, so there's no setup")}
               renderIcon={(color, size) => <Plus size={size} color={color} />}
@@ -154,7 +169,7 @@ export default function ChooseStep({
         ) : (
           <>
             <OptionTile
-              emphasis="primary"
+              emphasis={onRootiestId ? undefined : 'primary'}
               title={t('login.mobile.scan_title', 'Scan a sign-in code')}
               description={t('login.mobile.scan_desc', "The fastest way in if you're signed in on the web")}
               renderIcon={(color, size) => <QrCode size={size} color={color} />}

@@ -3,11 +3,21 @@
 
      The launcher shows the short "Mail" (@string/launcher_label, scripts/brand.py) because "Rootiest Mail" is cut off
      under the icon. The app keeps its full name everywhere else (Settings > Apps, the app switcher, Obtainium), as
-     Rootiest Notes does. -->
+     Rootiest Notes does.
+
+     dev.rootiest.mail:// is the app's own RootiestID sign-in callback (src/lib/rootiest.ts). Upstream's schemes stay
+     for the webmail hand-off and pairing; this one is ours alone, so Bulwark Mobile installed alongside can't take it. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity
             android:name="com.anonymous.bulwarkmobile.MainActivity"
-            android:label="@string/launcher_label" />
+            android:label="@string/launcher_label">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="dev.rootiest.mail" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

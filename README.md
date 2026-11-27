@@ -18,6 +18,9 @@ What it changes from Bulwark Mobile:
   - It's called Rootiest Mail, with its own app ID (`dev.rootiest.mail`), launcher icon, notification icon and logo.
   - It installs alongside Bulwark Mobile.
   - It names itself Rootiest Mail in every language the app speaks.
+- **Sign-in:** **Sign in with RootiestID** comes first on the sign-in screen. It signs in in the browser with the
+  app's own RootiestID client, straight to Rootiest's mail server, with no computer needed. In RootiestID it shows as its
+  own app ("Rootiest Mail App"), so it can be signed out on its own. Scanning a code from the webmail still works.
 - **Colors:** its default theme is the Rootiest palette, the same as the Rootiest webmail's: Catppuccin Mocha with a green
   accent in dark mode, and Latte with a flamingo accent in light mode.
 - **Account avatars:** the account lists show the photo of the contact with the account's own address, as the webmail does.
@@ -26,7 +29,8 @@ What it changes from Bulwark Mobile:
   [ntfy](https://ntfy.sh). Settings › Notifications switches between them.
 - **Updates:** it has no built-in updater. Releases are published here for [Obtainium](https://obtainium.imranr.dev) and
   on Google Play's closed testing track.
-- **Source:** Settings › About links to this repository.
+- **Source and support:** Settings › About links to this repository and to Bulwark Mobile, and **Report a problem**
+  opens a request on [support.rootiest.dev](https://support.rootiest.dev) with the app version filled in.
 
 The git history has every change, with dates. All of them are in the `rootiest` build flavor (below), so Bulwark
 Mobile's own builds are unchanged.
@@ -77,8 +81,11 @@ release based on Bulwark Mobile 0.1.96.
 
 ### Signing in
 
-To sign in, open the Rootiest webmail on a computer, go to **Settings → Security → Link Mobile App**, and scan the code
-with **Scan a sign-in code**.
+Tap **Sign in with RootiestID** and sign in to RootiestID in the browser that opens. You need to be in RootiestID's `mail`
+group, as for the webmail.
+
+You can also sign in from a computer: open the Rootiest webmail, go to **Settings → Security → Link Mobile App**, and
+scan the code with **Scan a sign-in code**.
 
 ## Building
 
