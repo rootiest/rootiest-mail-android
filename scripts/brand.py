@@ -59,6 +59,11 @@ ROOTIEST_ONLY = {
     "settings.notifications.push.relay_desc_mobile",
     "email_composer.attach_bulwark_files",
 }
+# Strings that name Bulwark on purpose, because they mean upstream itself (Settings > About's "Based on Bulwark
+# Mobile"): left as they are.
+KEEP_BULWARK = {
+    "settings.about.based_on_bulwark",
+}
 # A key the app reads: t('key' ...) anywhere in src outside the tests.
 USED_KEY = re.compile(r"""\bt\(\s*['"]([a-zA-Z0-9_.-]+)['"]""")
 
@@ -149,7 +154,7 @@ def locale_outputs() -> dict[Path, str]:
     english = catalog("en")
     app_keys = set(flatten(json.loads((LOCALES / "rn/en.json").read_text(encoding="utf-8"))))
     # The app's own strings, and the web ones it reads, that name Bulwark.
-    keys = {k for k, v in english.items() if "Bulwark" in v and (k in used or k in app_keys)}
+    keys = {k for k, v in english.items() if "Bulwark" in v and (k in used or k in app_keys) and k not in KEEP_BULWARK}
 
     langs = sorted(p.stem for p in (LOCALES / "rn").glob("*.json"))
     result = {}
