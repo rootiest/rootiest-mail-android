@@ -119,6 +119,29 @@ To release:
 It publishes `rootiest-mail-<version>.apk` as the Gitea release `v<version>`, with the pull requests merged since the
 last release as its notes. It refuses an APK that isn't signed with the release certificate pinned in the script.
 
+### Google Play
+
+`scripts/release.sh` also builds `rootiest-mail-<version>.aab` into `build/play/`, after the same certificate check.
+The bundle carries the arm64-v8a, armeabi-v7a and x86_64 libraries, and Play gives each device its own; the Obtainium
+APK stays arm64 only.
+
+- **Signing:** Play signs with the release key itself (Play App Signing set to the existing key). A key Google
+  generated would be a different certificate, so a Play install and an Obtainium install couldn't update each other.
+- **Upload:** after the Gitea release, `release.sh` releases the bundle on the `internal` and `alpha` tracks (internal
+  and closed testing) with `scripts/play-upload.py`, in one Play edit. Its release notes list only the pull requests
+  people notice in the app (`feat`, `fix` and `perf`, not those scoped to `build`, `ci`, `deps` or `release`), without
+  the type or number, with product names spelled properly (`play_names` in `release.sh`), cut to Play's 500
+  characters. `--dry-run` signs in and lists the tracks instead. If the upload fails, the Gitea release is already out,
+  and `release.sh` prints the command to retry it.
+- **Promoting:** a version already on internal testing goes to closed testing on its own with
+  `scripts/play-upload.py --package dev.rootiest.mail --promote internal=alpha` (nothing is uploaded).
+- **The Play key:** it signs in as the service account `rootiest-apps-publish@rootiest-apps.iam.gserviceaccount.com`,
+  which Play Console's Users and permissions lets release the Rootiest apps. Its JSON key is
+  `~/.local/share/android/play-publisher.json` (mode 600, or `$PLAY_KEY`), shared with the other Rootiest apps.
+  Without it, `release.sh` leaves the bundle in `build/play/` to upload in Play Console by hand.
+- `play-upload.py` needs only Python's standard library and `openssl`. If Play won't send the edit for review because
+  the app has other unfinished changes, it commits without sending and says so: check Publishing overview.
+
 ## License
 
 Rootiest Mail for Android is free software under the [GNU Affero General Public License, version 3 only](LICENSE),
