@@ -24,13 +24,41 @@ What it changes from Bulwark Mobile:
 - **Notifications:** they come through Rootiest's own push relay (`relay.rootiest.dev`), by Google push (Firebase
   project `rootiest-mail`) by default, or by [UnifiedPush](https://unifiedpush.org) through a distributor such as
   [ntfy](https://ntfy.sh). Settings › Notifications switches between them.
-- **Updates:** it has no built-in updater. Releases are published here for [Obtainium](https://obtainium.imranr.dev).
+- **Updates:** it has no built-in updater. Releases are published here for [Obtainium](https://obtainium.imranr.dev) and
+  on Google Play's closed testing track.
 - **Source:** Settings › About links to this repository.
 
 The git history has every change, with dates. All of them are in the `rootiest` build flavor (below), so Bulwark
 Mobile's own builds are unchanged.
 
 ## Installing
+
+Get it from Google Play's closed test, or from the releases here with Obtainium. Both are signed with the same key, so
+either one updates the other. It installs alongside Bulwark Mobile.
+
+### Google Play (closed testing)
+
+Rootiest Mail is in closed testing on Google Play. Anyone can join. Do all three steps with **the same Google account
+your phone's Play Store uses**:
+
+1. **Join** the [Rootiest Mail Google Group](https://groups.google.com/g/rootiest-mail).
+2. **Opt in** to testing at
+   [play.google.com/apps/testing/dev.rootiest.mail](https://play.google.com/apps/testing/dev.rootiest.mail). It works
+   from any browser.
+3. **Install** it from [Google Play](https://play.google.com/store/apps/details?id=dev.rootiest.mail). Updates then
+   arrive like any other app's.
+
+Please keep the app installed for at least **14 days**: Google needs that before the app can be published to everyone.
+
+- **Already got a "welcome to the group" email?** You're a member: go straight to step 2.
+- **"Item not found" in the Play Store:** the Play Store is signed in to a different Google account than the one in the
+  group. Switch accounts in the Play Store (tap your profile picture), then open the install link again.
+- **The opt-in page says you can't join:** you're not in the group yet, or you just joined. Wait a few minutes and
+  reload. Google can take up to an hour to pass new testers through.
+
+The group is for announcements only. To report a problem, go to [support.rootiest.dev](https://support.rootiest.dev).
+
+### Obtainium
 
 Each release is on the [Releases page](https://git.rootiest.dev/rootiest/rootiest-mail-android/releases) as a signed
 APK. To let Obtainium install it and keep it updated, add it in one of three ways:
@@ -44,11 +72,13 @@ APK. To let Obtainium install it and keep it updated, add it in one of three way
 
 [obtainium]: https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22dev.rootiest.mail%22%2C%22url%22%3A%22https%3A%2F%2Fgit.rootiest.dev%2Frootiest%2Frootiest-mail-android%22%2C%22author%22%3A%22rootiest%22%2C%22name%22%3A%22Rootiest%20Mail%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22includeDrafts%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22invertReleaseTitlesFilter%5C%22%3Afalse%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22invertReleaseNotesFilter%5C%22%3Afalse%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22sortMethodChoice%5C%22%3A%5C%22date%5C%22%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Afalse%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22%5Erootiest-mail-%5B0-9%5D%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22minimumUpdateAgeDays%5C%22%3A%5C%22%5C%22%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22refreshBeforeDownload%5C%22%3Afalse%2C%5C%22detectionDateAsReleaseDate%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22appAuthor%5C%22%3A%5C%22%5C%22%2C%5C%22installerMode%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22allowedSigningCertHashes%5C%22%3A%5C%22%5C%22%2C%5C%22about%5C%22%3A%5C%22%5C%22%2C%5C%22updateHealthStaleRelease%5C%22%3A%5C%22%5C%22%2C%5C%22updateHealthStaleVersion%5C%22%3A%5C%22%5C%22%2C%5C%22updateHealthFailedChecks%5C%22%3A%5C%22%5C%22%2C%5C%22updateHealthArchived%5C%22%3A%5C%22%5C%22%2C%5C%22updateHealthFilteredReleases%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3A%22Codeberg%22%7D
 
-To sign in, open the Rootiest webmail on a computer, go to **Settings → Security → Link Mobile App**, and scan the code
-with **Scan a sign-in code**.
-
 Release versions are Bulwark Mobile's version plus a Rootiest revision. For example, `0.1.96-r1` is the first Rootiest
 release based on Bulwark Mobile 0.1.96.
+
+### Signing in
+
+To sign in, open the Rootiest webmail on a computer, go to **Settings → Security → Link Mobile App**, and scan the code
+with **Scan a sign-in code**.
 
 ## Building
 
