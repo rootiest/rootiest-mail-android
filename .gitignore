@@ -65,3 +65,17 @@ yarn-error.*
 /android/metro.log
 # the Google Play bundle scripts/release.sh leaves for Play Console
 /build/play/
+
+#   ──────────────── Added by agents-init ──────────────────
+#   agents-init --agents
+AGENTS/
+AGENTS.local.md
+#   ────────────────────────────────────────────────────────
+
+#   ──────────────── Added by agents-init ──────────────────
+#   agents-init --plugins
+docs/superpowers
+docs/plans
+docs/specs
+docs/devlogs
+#   ────────────────────────────────────────────────────────
