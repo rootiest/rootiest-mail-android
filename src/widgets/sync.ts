@@ -1,8 +1,9 @@
 // Keeps the widgets current while the app runs. The launcher only asks for an
 // update every 30 minutes and pushes only announce new mail, so the app
 // refreshes the snapshot itself whenever what the widgets show may have
-// changed: mail or calendar data, the theme or clock settings, and when the
-// app goes to the background (the most likely moment to glance at a widget).
+// changed: mail or calendar data, the theme or clock settings, an account's
+// colour, and when the app goes to the background (the most likely moment to
+// glance at a widget).
 
 import { AppState, NativeModules, Platform } from 'react-native';
 import { readRegistry, refreshSnapshot } from './build';
@@ -68,6 +69,7 @@ export function startWidgetSync(): () => void {
   const { useEmailStore } = require('../stores/email-store') as typeof import('../stores/email-store');
   const { useCalendarStore } = require('../stores/calendar-store') as typeof import('../stores/calendar-store');
   const { useSettingsStore } = require('../stores/settings-store') as typeof import('../stores/settings-store');
+  const { useAccountStore } = require('../stores/account-store') as typeof import('../stores/account-store');
 
   schedule(3000, true);
   const unsubscribers = [
@@ -86,6 +88,12 @@ export function startWidgetSync(): () => void {
       ) {
         schedule(500, true);
       }
+    }),
+    // An account given another colour: the widgets draw accounts in it.
+    useAccountStore.subscribe((state, prev) => {
+      if (state.accounts === prev.accounts) return;
+      const before = new Map(prev.accounts.map((a) => [a.id, a.avatarColor]));
+      if (state.accounts.some((a) => before.has(a.id) && before.get(a.id) !== a.avatarColor)) schedule(500, true);
     }),
   ];
   const appState = AppState.addEventListener('change', handleAppState);

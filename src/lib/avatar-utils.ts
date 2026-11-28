@@ -16,7 +16,7 @@ import { parseColor, relativeLuminance } from './event-colors';
 
 // --- Account avatar -------------------------------------------------------
 
-const ACCOUNT_AVATAR_PALETTE = [
+export const ACCOUNT_AVATAR_PALETTE = [
   '#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#d97706',
   '#65a30d', '#16a34a', '#0d9488', '#0891b2', '#6366f1', '#9333ea',
 ];

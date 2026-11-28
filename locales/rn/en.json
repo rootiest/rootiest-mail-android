@@ -1154,6 +1154,8 @@
     },
     "account": {
       "accounts": {
+        "color": "Account color",
+        "color_automatic": "Automatic",
         "description_mobile": "Reorder how accounts appear in the account switcher, pick the default, or sign one out.",
         "limit": "Maximum of {count} accounts reached."
       },

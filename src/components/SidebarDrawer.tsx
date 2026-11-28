@@ -1556,10 +1556,8 @@ function makeStyles(c: ThemePalette) {
   },
   accountPressed: { backgroundColor: c.surfaceHover },
   accountChevronOpen: { transform: [{ rotate: '180deg' }] },
-  accountAvatarText: {
-    ...typography.bodySemibold,
-    color: c.primaryForeground,
-  },
+  // No colour: AccountAvatar picks the initials' colour from the account's.
+  accountAvatarText: typography.bodySemibold,
   accountInfo: { flex: 1, minWidth: 0 },
   accountName: { ...typography.bodyMedium, color: c.text },
   accountEmail: { ...typography.caption, color: c.textMuted, marginTop: 1 },
@@ -1601,7 +1599,6 @@ function makeStyles(c: ThemePalette) {
   accountMenuAvatarText: {
     ...typography.caption,
     fontWeight: '600',
-    color: c.primaryForeground,
   },
   accountMenuCheckBadge: {
     position: 'absolute',

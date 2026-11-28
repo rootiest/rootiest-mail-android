@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { createPersistStorage } from './persist-storage';
 import { AccountLimitError, generateAccountId, MAX_ACCOUNTS, setKnownAccounts } from '../lib/account-utils';
-import { generateAvatarColor } from '../lib/avatar-utils';
+import { automaticAccountColor, isAccountColor } from '../lib/account-color';
 
 export interface AccountEntry {
   id: string;
@@ -10,7 +10,12 @@ export interface AccountEntry {
   username: string;
   displayName: string;
   email: string;
+  // The colour the account is drawn in: the user's choice, else the one
+  // hashed from its address (lib/account-color).
   avatarColor: string;
+  // The colour the user chose for the account (`#rrggbb`); absent means
+  // automatic.
+  customAvatarColor?: string;
   lastLoginAt: number;
   isConnected: boolean;
   hasError: boolean;
@@ -34,11 +39,14 @@ interface AccountState {
   activeAccountId: string | null;
   defaultAccountId: string | null;
 
-  addAccount: (entry: Omit<AccountEntry, 'id' | 'avatarColor' | 'isDefault'>) => string;
+  addAccount: (entry: Omit<AccountEntry, 'id' | 'avatarColor' | 'customAvatarColor' | 'isDefault'>) => string;
   removeAccount: (accountId: string) => void;
   setActiveAccount: (accountId: string) => void;
   setDefaultAccount: (accountId: string) => void;
   updateAccount: (accountId: string, updates: Partial<AccountEntry>) => void;
+  // Choose the account's colour (`#rrggbb`), or null for automatic: the
+  // colour hashed from its address. Anything else is ignored.
+  setAccountColor: (accountId: string, color: string | null) => void;
   // Persist a new display order (ids in the desired order; unknown ids are
   // ignored, missing ones keep their relative order at the end).
   reorderAccounts: (orderedIds: string[]) => void;
@@ -94,7 +102,7 @@ export const useAccountStore = create<AccountState>()(
         const account: AccountEntry = {
           ...entry,
           id,
-          avatarColor: generateAvatarColor(entry.email || entry.username),
+          avatarColor: automaticAccountColor(entry),
           isDefault,
         };
 
@@ -146,6 +154,21 @@ export const useAccountStore = create<AccountState>()(
       updateAccount: (accountId, updates) => {
         set((s) => ({
           accounts: s.accounts.map((a) => (a.id === accountId ? { ...a, ...updates } : a)),
+        }));
+      },
+
+      setAccountColor: (accountId, color) => {
+        if (color !== null && !isAccountColor(color)) return;
+        set((s) => ({
+          accounts: s.accounts.map((a) => {
+            if (a.id !== accountId) return a;
+            if (color === null) {
+              const { customAvatarColor: _dropped, ...rest } = a;
+              return { ...rest, avatarColor: automaticAccountColor(a) };
+            }
+            const chosen = color.trim().toLowerCase();
+            return { ...a, avatarColor: chosen, customAvatarColor: chosen };
+          }),
         }));
       },
 

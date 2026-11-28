@@ -221,7 +221,7 @@ function makeStyles(c: ThemePalette) {
 
     accountList: { gap: spacing.md },
     accountRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-    avatarText: { ...typography.bodySemibold, color: c.primaryForeground },
+    avatarText: typography.bodySemibold,
     accountText: { flex: 1 },
     accountName: { ...typography.bodyMedium, color: c.text },
     accountEmail: { ...typography.caption, color: c.textMuted },
