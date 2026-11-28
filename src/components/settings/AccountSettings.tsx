@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ArrowDown, ArrowUp, Check, ChevronRight, ExternalLink, Plus, Star, Trash2, Users } from '../icons';
+import { ArrowDown, ArrowUp, Check, ChevronRight, ExternalLink, Palette, Plus, Star, Trash2, Users } from '../icons';
 import { SettingsSection, SettingItem } from './settings-section';
 import Button from '../Button';
 import { spacing, radius, typography, componentSizes, type ThemePalette } from '../../theme/tokens';
@@ -18,6 +18,8 @@ import { jmapClient } from '../../api/jmap-client';
 import { fetchMailQuota, type MailQuota } from '../../api/quota';
 import { MAX_ACCOUNTS, accountRowText, nonDefaultPort, serverHostLabel } from '../../lib/account-utils';
 import { toUnicodeEmail } from '../../lib/idn';
+import { accountColorChoices, automaticAccountColor } from '../../lib/account-color';
+import { initialsColor } from '../../lib/avatar-utils';
 import AccountAvatar from '../AccountAvatar';
 import type { RootStackParamList } from '../../navigation/types';
 
@@ -49,6 +51,10 @@ export function AccountSettings() {
   const defaultAccountId = useAccountStore((s) => s.defaultAccountId);
   const setDefaultAccount = useAccountStore((s) => s.setDefaultAccount);
   const reorderAccounts = useAccountStore((s) => s.reorderAccounts);
+  const setAccountColor = useAccountStore((s) => s.setAccountColor);
+  // The account whose colour picker is open, under its row.
+  const [colorPickerFor, setColorPickerFor] = useState<string | null>(null);
+  const colorChoices = React.useMemo(() => accountColorChoices(c), [c]);
   const account = accounts.find((a) => a.id === activeAccountId);
   // The paired webmail's config (#1570): the mail server's account page.
   const accountPageUrl = usePolicyStore((s) => s.links.accountManagementUrl);
@@ -191,82 +197,106 @@ export function AccountSettings() {
             // The address leads when another account has the same name.
             const rowText = accountRowText(a, accounts);
             return (
-              <View key={a.id} style={[styles.row, index > 0 && styles.rowBorder]}>
-                <AccountAvatar
-                  email={a.email || a.username}
-                  color={a.avatarColor}
-                  initials={(a.displayName || a.username).slice(0, 1).toUpperCase()}
-                  size={32}
-                  textStyle={styles.avatarText}
-                />
-                <Pressable
-                  style={{ flex: 1, minWidth: 0 }}
-                  onPress={() => {
-                    // The server refused its stored sign-in: sign in again.
-                    if (a.needsSignIn) void requestReauth(a.id);
-                    else if (!isActive) void switchAccount(a.id);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={isActive
-                    ? t('settings.account.accounts.active', 'Currently active account')
-                    : t('settings.account.accounts.switch_to', 'Switch to this account')}
-                >
-                  <View style={styles.rowTitle}>
-                    <Text style={styles.rowName} numberOfLines={1}>{toUnicodeEmail(rowText.title)}</Text>
-                    {isActive && <Check size={14} color={c.success} />}
+              <View key={a.id} style={index > 0 && styles.rowBorder}>
+                <View style={styles.row}>
+                  {/* The avatar opens the account's colour picker. */}
+                  <Pressable
+                    onPress={() => setColorPickerFor((open) => (open === a.id ? null : a.id))}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('settings.account.accounts.color', 'Account color')}
+                    accessibilityState={{ expanded: colorPickerFor === a.id }}
+                    hitSlop={6}
+                  >
+                    <AccountAvatar
+                      email={a.email || a.username}
+                      color={a.avatarColor}
+                      initials={(a.displayName || a.username).slice(0, 1).toUpperCase()}
+                      size={32}
+                      textStyle={styles.avatarText}
+                    />
+                    <View style={styles.colorBadge}>
+                      <Palette size={10} color={c.mutedForeground} />
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    style={{ flex: 1, minWidth: 0 }}
+                    onPress={() => {
+                      // The server refused its stored sign-in: sign in again.
+                      if (a.needsSignIn) void requestReauth(a.id);
+                      else if (!isActive) void switchAccount(a.id);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={isActive
+                      ? t('settings.account.accounts.active', 'Currently active account')
+                      : t('settings.account.accounts.switch_to', 'Switch to this account')}
+                  >
+                    <View style={styles.rowTitle}>
+                      <Text style={styles.rowName} numberOfLines={1}>{toUnicodeEmail(rowText.title)}</Text>
+                      {isActive && <Check size={14} color={c.success} />}
+                    </View>
+                    {rowText.subtitle ? <Text style={styles.rowSub} numberOfLines={1}>{toUnicodeEmail(rowText.subtitle)}</Text> : null}
+                    {/* Two servers on one host are two accounts with the same address. */}
+                    {nonDefaultPort(a.serverUrl) ? <Text style={styles.rowSub} numberOfLines={1}>{serverHostLabel(a.serverUrl)}</Text> : null}
+                    {isDefault && (
+                      <Text style={styles.defaultBadge}>
+                        {t('settings.account.accounts.default_badge', 'Default account')}
+                      </Text>
+                    )}
+                    {a.needsSignIn ? (
+                      <Text style={styles.rowError} numberOfLines={1}>{t('sidebar.account_sign_in_again', 'Sign in again')}</Text>
+                    ) : a.hasError && a.errorMessage ? (
+                      <Text style={styles.rowError} numberOfLines={1}>{a.errorMessage}</Text>
+                    ) : null}
+                  </Pressable>
+                  <View style={styles.rowActions}>
+                    <Pressable
+                      style={styles.iconBtn}
+                      onPress={() => move(a.id, -1)}
+                      disabled={index === 0}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('settings.account.accounts.move_up', 'Move up')}
+                    >
+                      <ArrowUp size={14} color={index === 0 ? c.border : c.mutedForeground} />
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconBtn}
+                      onPress={() => move(a.id, 1)}
+                      disabled={index === accounts.length - 1}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('settings.account.accounts.move_down', 'Move down')}
+                    >
+                      <ArrowDown size={14} color={index === accounts.length - 1 ? c.border : c.mutedForeground} />
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconBtn}
+                      onPress={() => setDefaultAccount(a.id)}
+                      disabled={isDefault}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('settings.account.accounts.set_default', 'Set as default')}
+                    >
+                      <Star size={14} color={isDefault ? c.warning : c.mutedForeground} fill={isDefault ? c.warning : 'transparent'} />
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconBtn}
+                      onPress={() => confirmRemove(a.id, a.email || a.username)}
+                      disabled={busyId !== null}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('common.remove', 'Remove')}
+                    >
+                      <Trash2 size={14} color={c.error} />
+                    </Pressable>
                   </View>
-                  {rowText.subtitle ? <Text style={styles.rowSub} numberOfLines={1}>{toUnicodeEmail(rowText.subtitle)}</Text> : null}
-                  {/* Two servers on one host are two accounts with the same address. */}
-                  {nonDefaultPort(a.serverUrl) ? <Text style={styles.rowSub} numberOfLines={1}>{serverHostLabel(a.serverUrl)}</Text> : null}
-                  {isDefault && (
-                    <Text style={styles.defaultBadge}>
-                      {t('settings.account.accounts.default_badge', 'Default account')}
-                    </Text>
-                  )}
-                  {a.needsSignIn ? (
-                    <Text style={styles.rowError} numberOfLines={1}>{t('sidebar.account_sign_in_again', 'Sign in again')}</Text>
-                  ) : a.hasError && a.errorMessage ? (
-                    <Text style={styles.rowError} numberOfLines={1}>{a.errorMessage}</Text>
-                  ) : null}
-                </Pressable>
-                <View style={styles.rowActions}>
-                  <Pressable
-                    style={styles.iconBtn}
-                    onPress={() => move(a.id, -1)}
-                    disabled={index === 0}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('settings.account.accounts.move_up', 'Move up')}
-                  >
-                    <ArrowUp size={14} color={index === 0 ? c.border : c.mutedForeground} />
-                  </Pressable>
-                  <Pressable
-                    style={styles.iconBtn}
-                    onPress={() => move(a.id, 1)}
-                    disabled={index === accounts.length - 1}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('settings.account.accounts.move_down', 'Move down')}
-                  >
-                    <ArrowDown size={14} color={index === accounts.length - 1 ? c.border : c.mutedForeground} />
-                  </Pressable>
-                  <Pressable
-                    style={styles.iconBtn}
-                    onPress={() => setDefaultAccount(a.id)}
-                    disabled={isDefault}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('settings.account.accounts.set_default', 'Set as default')}
-                  >
-                    <Star size={14} color={isDefault ? c.warning : c.mutedForeground} fill={isDefault ? c.warning : 'transparent'} />
-                  </Pressable>
-                  <Pressable
-                    style={styles.iconBtn}
-                    onPress={() => confirmRemove(a.id, a.email || a.username)}
-                    disabled={busyId !== null}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('common.remove', 'Remove')}
-                  >
-                    <Trash2 size={14} color={c.error} />
-                  </Pressable>
                 </View>
+                {colorPickerFor === a.id && (
+                  <AccountColorPicker
+                    styles={styles}
+                    automatic={automaticAccountColor(a)}
+                    chosen={a.customAvatarColor ?? null}
+                    choices={colorChoices}
+                    onChoose={(color) => setAccountColor(a.id, color)}
+                    automaticLabel={t('settings.account.accounts.color_automatic', 'Automatic')}
+                  />
+                )}
               </View>
             );
           })}
@@ -327,6 +357,49 @@ export function AccountSettings() {
   );
 }
 
+interface AccountColorPickerProps {
+  styles: ReturnType<typeof makeStyles>;
+  /** The colour hashed from the account's address. */
+  automatic: string;
+  /** The colour the user chose, or null for automatic. */
+  chosen: string | null;
+  choices: string[];
+  onChoose: (color: string | null) => void;
+  automaticLabel: string;
+}
+
+/** "Automatic" (the hashed colour) and the theme's accents, under an account's row. */
+function AccountColorPicker({ styles, automatic, chosen, choices, onChoose, automaticLabel }: AccountColorPickerProps) {
+  return (
+    <View style={styles.colorPicker} accessibilityRole="radiogroup">
+      <Pressable
+        onPress={() => onChoose(null)}
+        accessibilityRole="radio"
+        accessibilityState={{ checked: chosen === null }}
+        style={[styles.colorAutomatic, chosen === null && styles.colorAutomaticSelected]}
+      >
+        <View style={[styles.colorSwatchSmall, { backgroundColor: automatic }]} />
+        <Text style={styles.colorAutomaticText}>{automaticLabel}</Text>
+      </Pressable>
+      {choices.map((color) => {
+        const selected = chosen === color;
+        return (
+          <Pressable
+            key={color}
+            onPress={() => onChoose(color)}
+            accessibilityRole="radio"
+            accessibilityLabel={color}
+            accessibilityState={{ checked: selected }}
+            style={[styles.colorSwatch, { backgroundColor: color }, selected && styles.colorSwatchSelected]}
+          >
+            {selected && <Check size={14} color={initialsColor(color)} />}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function makeStyles(c: ThemePalette) {
   return StyleSheet.create({
   value: {
@@ -379,7 +452,49 @@ function makeStyles(c: ThemePalette) {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { ...typography.bodyMedium, color: '#ffffff' },
+  avatarText: typography.bodyMedium,
+  colorBadge: {
+    position: 'absolute',
+    right: -4,
+    bottom: -4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: c.background,
+    borderWidth: 1,
+    borderColor: c.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorPicker: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  colorAutomatic: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 32,
+    paddingHorizontal: spacing.sm + 2,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  colorAutomaticSelected: { borderColor: c.primary, borderWidth: 2 },
+  colorAutomaticText: { ...typography.caption, color: c.text },
+  colorSwatchSmall: { width: 16, height: 16, borderRadius: 8 },
+  colorSwatch: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorSwatchSelected: { borderWidth: 2, borderColor: c.text },
   rowTitle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   rowName: { ...typography.bodyMedium, color: c.text, flexShrink: 1 },
   rowSub: { ...typography.caption, color: c.mutedForeground },
